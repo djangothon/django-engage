@@ -3,3 +3,4 @@ testapp/
 django_engage/
 .DS_Store
 manage.py
+*.pyc
