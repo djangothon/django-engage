@@ -1,0 +1,5 @@
+db.sqlite3
+testapp/
+django_engage/
+.DS_Store
+manage.py
