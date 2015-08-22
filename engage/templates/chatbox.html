@@ -1,0 +1,42 @@
+{% if request.user %}
+    <div id="django-engage">
+        <style>
+            .loading {
+                visibility: hidden;
+            }
+        </style>
+        {% load staticfiles %}
+        {% load swampdragon_tags %}
+        <div id="engage-message-box" class="loading">
+            <input type="text" id="message" value="" onkeypress="enterHandler(event, this.value)">
+
+        </div>
+        {% swampdragon_settings %}
+        <script src="{% static 'swampdragon/js/dist/swampdragon.min.js' %}"></script>
+        <script>
+            (function(window){
+                'use strict';
+
+                var $ = document.querySelectorAll.bind(document);
+                var mbox = $('#engage-message-box')[0];
+
+                swampdragon.ready(function() {
+                    console.log('open sd ' + new Date());
+                });
+                swampdragon.open(function() {
+                    console.log('{{request.user.username}} connected');
+                    mbox.classList.remove('loading');
+                });
+                function sendMessage(text) {
+                    swampdragon.create('user-message', { 'text': text });
+                }
+                window.enterHandler = function (e, text) {
+                    if (e.keyCode === 13 && text) {
+                        sendMessage(text);
+                    }
+                };
+            })(window);
+
+        </script>
+    </div>
+{% endif %}
