@@ -13,11 +13,18 @@ class UserMessageRouter(ModelRouter):
     permission_classes = [LoginRequired()]
 
     def get_object(self, **kwargs):
-        print self.connection.user
         return self.model.objects.get(pk=kwargs['pk'])
 
     def get_query_set(self, **kwargs):
         return self.model.all()
 
+    def create(self, **kwargs):
+        initial = self.get_initial('create', **kwargs)
+        self.serializer = self.serializer_class(data=kwargs, initial=initial)
+        UserMessage.objects.create(
+            text=self.serializer.data['text'],
+            user=self.connection.user
+        )
+        self.send("done")
 
 route_handler.register(UserMessageRouter)
