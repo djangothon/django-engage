@@ -148,6 +148,16 @@
 
                 // });
 
+                swampdragon.onChannelMessage(function(channels, message) {
+                    if(channels[0] === ('user-message-' + getUser())){
+                        msgbox.push(
+                            message.data.text,
+                            '11: 30 PM',
+                            message.data.direction
+                        );
+                    }
+                });
+
                 swampdragon.ready(function() {
                     console.log('Started connection ' + new Date());
                 });
@@ -157,6 +167,8 @@
                 });
 
                 window.setUser = function(id, username) {
+                    swampdragon.unsubscribe('user-message', ('user-message-' + userid));
+                    swampdragon.subscribe('user-message', ('user-message-' + id));
                     userid = id;
                     if (userid){
                         mbox.classList.remove('closed');
@@ -176,7 +188,6 @@
                 window.enterHandler = function (e, input) {
                     if (e.keyCode === 13 && input.value) {
                         sendMessage(input.value);
-                        msgbox.push(input.value, new Date(), 'to');
                         input.value = '';
                     }
                 };

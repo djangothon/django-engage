@@ -1,7 +1,7 @@
 from swampdragon import route_handler
 from swampdragon.route_handler import ModelRouter
 from swampdragon.permissions import LoginRequired
-from swampdragon.pusub_providers.data_publisher import publish_data
+from swampdragon.pubsub_providers.data_publisher import publish_data
 from django.contrib.auth import get_user_model
 
 from .serializers import UserMessageSerializer
@@ -13,7 +13,7 @@ class UserMessageRouter(ModelRouter):
     model = UserMessage
     route_name = 'user-message'
     permission_classes = [LoginRequired()]
-    valid_verbs = ['subscribe']
+    valid_verbs = ['subscribe', 'create', 'unsubscribe']
 
     def get_subscription_channels(self, **kwargs):
         # ret = [('user-message-' + user.pk) for user in get_user_model().objects.all()]
@@ -33,9 +33,9 @@ class UserMessageRouter(ModelRouter):
             user=self.connection.user,
             direction='from'
         )
-        publish_data('user-message-' + self.connection.user.pk, {
+        publish_data('user-message-%s' % self.connection.user.pk, {
             'text': msg.text,
-            'created_at': msg.created_at,
+            'created_at': str(msg.created_at),
             'direction': 'from'
         })
         self.send('done')
@@ -63,14 +63,13 @@ class AdminMessageRouter(ModelRouter):
             user=user,
             direction='to'
         )
-        publish_data('user-message-' + user.pk, {
+        publish_data('user-message-%s' % user.pk, {
             'text': msg.text,
-            'created_at': msg.created_at,
+            'created_at': str(msg.created_at),
             'direction': 'from'
         })
 
         self.send('done')
 
-print UserMessageRouter, AdminMessageRouter
 route_handler.register(UserMessageRouter)
 route_handler.register(AdminMessageRouter)

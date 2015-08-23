@@ -40,12 +40,12 @@
                 border-radius: 0.5em;
                 border: 1px solid #efefef;
             }
-            #django-engage .to {
+            #django-engage .from {
                 float: right;
                 background: white;
                 margin-left: 4em;
             }
-            #django-engage .from {
+            #django-engage .to {
                 float: left;
                 background: #eee;
                 margin-right: 4em;
@@ -150,13 +150,16 @@
                     mbox.classList.toggle('opened');
                 });
 
-                // swampdragon.onChannelMessage(function(channels, message) {
-                //     console.log('channel ', channels, message);
-                // });
+                swampdragon.onChannelMessage(function(channels, message) {
+                    msgbox.push(
+                        message.data.text,
+                        '11: 30 PM',
+                        message.data.direction
+                    );
+                });
                 swampdragon.ready(function() {
                     console.log('Started connection ' + new Date());
-                    //swampdragon.subscribe('usermessage','usermessage{{request.user.pk}}');
-
+                    swampdragon.subscribe('user-message','user-message-{{request.user.pk}}');
                 });
                 swampdragon.open(function() {
                     console.log('{{ request.user.username }} connected');
@@ -170,7 +173,6 @@
                 window.enterHandler = function (e, input) {
                     if (e.keyCode === 13 && input.value) {
                         sendMessage(input.value);
-                        msgbox.push(input.value, new Date(), 'to');
                         input.value = '';
                     }
                 };
