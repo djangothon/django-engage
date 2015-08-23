@@ -12,6 +12,7 @@ class UserMessage(SelfPublishModel, models.Model):
                 settings.AUTH_USER_MODEL,
                 related_name='messages'
             )
+    direction = models.CharField(max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):

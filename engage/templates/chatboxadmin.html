@@ -1,0 +1,191 @@
+{% if request.user.username %}
+    <div id="django-engage">
+        <style>
+            #django-engage .loading {
+                visibility: hidden;
+            }
+            #django-engage .closed {
+                height: 3em;
+            }
+            #django-engage {
+                position: fixed;
+                font-family: sans-serif;
+                right: 0;
+                bottom: 0;
+                width: 350px;
+                font-size: 12px;
+            }
+            #engage-message-box input {
+                width: 100%;
+                height: 3em;
+                border: 1px solid #417690;
+            }
+            #engage-message-box input:focus {
+                outline: none;
+            }
+            #message-list {
+                height: 300px;
+                width: 100%;
+                background: #ffc;
+                border: 1px solid #417690;
+                overflow: auto;
+            }
+            #django-engage .to, #django-engage .from {
+                clear: both;
+                padding: 0.5em 1em;
+                margin: 0.25em 1em;
+                border-radius: 0.5em;
+                border: 1px solid #efefef;
+            }
+            #django-engage .to {
+                float: right;
+                background: white;
+                margin-left: 4em;
+            }
+            #django-engage .from {
+                float: left;
+                background: #eee;
+                margin-right: 4em;
+            }
+            #django-engage .message {
+                clear: both;
+            }
+            #django-engage .time {
+                font-size: 0.1em;
+                color: #aaa;
+                float: right;
+            }
+            #engage-message-box-title {
+                background-color: #417690;
+                color: #ffc;
+                width: 100%;
+                line-height: 3em;
+                height: 3em;
+                padding: 0 0.8em;
+                text-decoration: none;
+                display: block;
+            }
+        </style>
+        {% load staticfiles %}
+        {% load swampdragon_tags %}
+        <div id="engage-message-box" class="loading closed">
+            <div id="engage-message-box-title">Chat with <span id="username-title"><span></div>
+            <div id="message-pane">
+                <div id="message-list">
+                    <div class="from">
+                        <div class="message">Hello</div>
+                        <div class="time">11:30 PM</div>
+                    </div>
+                    <div class="to">
+                        <div class="message">hi</div>
+                        <div class="time">11:32 PM</div>
+                    </div>
+                    <div class="to">
+                        <div class="message">Can you help me with something. I am not able to find on how to change the settings for privacy.</div>
+                        <div class="time">11:39 PM</div>
+                    </div>
+                    <div class="from">
+                        <div class="message">Sure thing. You can find the settings under Your User profile which can be accessed by clicking your profile photo.</div>
+                        <div class="time">11:40 PM</div>
+                    </div>
+                </div>
+                <input type="text" id="message" value="" onkeypress="enterHandler(event, this)">
+            </div>
+        </div>
+        {% swampdragon_settings %}
+        <script src="{% static 'swampdragon/js/dist/swampdragon.min.js' %}"></script>
+
+        <script id="message_template" type="template">
+            <div class="{$direction$}">
+                <div class="message">{$message$}</div>
+                <div class="time">{$time$}</div>
+            </div>
+        </script>
+
+        <script>
+            (function(window) {
+                'use strict';
+                function MessageBox(box_id) {
+                    this.elem = document.querySelector(box_id);
+                    this.msgArr = [];
+                    this.template = document.querySelector('#message_template')
+                                                .innerHTML;
+                }
+
+                MessageBox.prototype.render = function() {
+                    var self = this;
+                    this.elem.innerHTML = this.msgArr.map(function(components) {
+                        var output = self.template;
+                        for (var name in components) {
+                            output = output.replace('{$' + name + '$}', components[name]);
+                        }
+                        return output;
+                    }).join('');
+                    this.elem.scrollTop = this.elem.scrollHeight;
+                };
+
+                MessageBox.prototype.push = function(msg, time, direction) {
+                    this.msgArr.push({'message': msg, 'time': time, 'direction':direction});
+                    this.render();
+                };
+
+                window.MessageBox = MessageBox;
+
+            })(window);
+
+            (function(window, MessageBox){
+                'use strict';
+
+                var $ = document.querySelectorAll.bind(document);
+                var mbox = $('#engage-message-box')[0];
+                var msgbox = new MessageBox('#message-list');
+                var username_title = $('#username-title')[0];
+                var userid=0;
+
+                // var title = $('#engage-message-box-title')[0];
+
+                // title.addEventListener('click', function() {
+
+                // });
+
+                swampdragon.ready(function() {
+                    console.log('Started connection ' + new Date());
+                });
+                swampdragon.open(function() {
+                    console.log('{{ request.user.username }} connected');
+                    mbox.classList.remove('loading');
+                });
+
+                window.setUser = function(id, username) {
+                    userid = id;
+                    if (userid){
+                        mbox.classList.remove('closed');
+                        username_title.innerHTML = username;
+                    } else {
+                        mbox.classList.add('closed');
+                    }
+                };
+
+                function getUser(){
+                    return userid;
+                }
+
+                function sendMessage(text) {
+                    swampdragon.create('admin-message', { 'text': text, 'user': getUser() });
+                }
+                window.enterHandler = function (e, input) {
+                    if (e.keyCode === 13 && input.value) {
+                        sendMessage(input.value);
+                        msgbox.push(input.value, new Date(), 'to');
+                        input.value = '';
+                    }
+                };
+
+
+
+            })(window, window.MessageBox);
+
+
+        </script>
+    </div>
+{% endif %}

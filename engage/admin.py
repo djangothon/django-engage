@@ -1,7 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.conf.urls import patterns, url
-from functools import update_wrapper
 
 from engage.models import UserMessage
 
